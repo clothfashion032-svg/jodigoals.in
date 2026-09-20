@@ -12,6 +12,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ============ GOOGLE ANALYTICS (GA4) ============ -->
+<!-- Replace 'G-YOUR-GA4-ID' with your actual Google Analytics 4 Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YOUR-GA4-ID"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  // Disable default pageview so the client-side router tracks virtual routes accurately
+  gtag('config', 'G-YOUR-GA4-ID', { send_page_view: false });
+</script>
+
 <style>
 /* ============ TOKENS ============ */
 :root{
@@ -32,16 +44,11 @@
   --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-synthesis: none;
 }
-:root:not([data-theme="light"]) { }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --cream:#1C1512; --blush:#2B1E1C; --blush-2:#33221F; --ink:#F3EAE4; --ink-soft:#C9BDB6;
     --white:#241A17; --line:rgba(243,234,228,0.12); --shadow:0 18px 40px -20px rgba(0,0,0,0.6);
   }
-}
-:root[data-theme="dark"]{
-  --cream:#1C1512; --blush:#2B1E1C; --blush-2:#33221F; --ink:#F3EAE4; --ink-soft:#C9BDB6;
-  --white:#241A17; --line:rgba(243,234,228,0.12); --shadow:0 18px 40px -20px rgba(0,0,0,0.6);
 }
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth; scroll-padding-top: calc(78px + env(safe-area-inset-top,0px));}
@@ -56,17 +63,20 @@ button{font-family:inherit; cursor:pointer;}
 .wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px;}
 h1,h2,h3,h4{font-family:var(--serif); font-weight:500; margin:0; letter-spacing:-0.01em; color:var(--ink);}
 p{line-height:1.65; color:var(--ink-soft); margin:0;}
-@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important; scroll-behavior:auto !important;} }
 ::selection{background:var(--rose); color:#fff;}
 
-/* subtle grain overlay for texture instead of stock photography */
+/* subtle grain overlay for texture */
 .grain{position:relative;}
 .grain::after{
-  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5; mix-blend-mode:overlay;
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.4; mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
 }
 
-/* painterly "photo" placeholders — layered gradients + line art instead of images */
+/* Photo handling with smooth transitions */
+.prod-img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .6s ease;}
+.pcard:hover .prod-img{transform:scale(1.06);}
+
+/* Fallback scape */
 .scape{position:relative; overflow:hidden; background:
   radial-gradient(120% 140% at 15% 15%, #E8B9B4 0%, transparent 55%),
   radial-gradient(120% 140% at 85% 85%, #C98E8F 0%, transparent 55%),
@@ -77,7 +87,6 @@ p{line-height:1.65; color:var(--ink-soft); margin:0;}
   radial-gradient(120% 140% at 10% 90%, #D9A6A6 0%, transparent 55%),
   linear-gradient(155deg, #EFD9D6, #A9666D 130%);
 }
-.scape svg{position:absolute; opacity:.9;}
 
 /* ============ HEADER ============ */
 header{
@@ -97,9 +106,6 @@ nav.mainnav a.active::after{content:""; position:absolute; left:0; right:0; bott
 .icon-btn:hover{background:var(--blush); transform:translateY(-1px);}
 .icon-btn svg{width:17px; height:17px;}
 .wish-count{position:absolute; top:-4px; right:-4px; background:var(--rose); color:#fff; font-size:10px; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700;}
-.social-mini{display:flex; gap:10px;}
-.social-mini a{color:var(--ink-soft); transition:color .2s;}
-.social-mini a:hover{color:var(--rose);}
 .hamburger{display:none; width:40px; height:40px; border:1px solid var(--line); border-radius:10px; background:transparent; align-items:center; justify-content:center; flex-direction:column; gap:4px;}
 .hamburger span{width:18px; height:1.5px; background:var(--ink); transition:transform .25s ease, opacity .25s ease;}
 .hamburger.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
@@ -109,11 +115,9 @@ nav.mainnav a.active::after{content:""; position:absolute; left:0; right:0; bott
 .mobile-panel{display:none; position:fixed; inset:74px 0 0 0; background:var(--cream); z-index:55; padding:24px; overflow-y:auto; transform:translateY(-12px); opacity:0; transition:transform .28s ease, opacity .28s ease; pointer-events:none;}
 .mobile-panel.show{display:block; transform:translateY(0); opacity:1; pointer-events:auto;}
 .mobile-panel a{display:block; font-family:var(--serif); font-size:22px; padding:14px 0; border-bottom:1px solid var(--line); color:var(--ink);}
-.mobile-panel .msocial{display:flex; gap:16px; margin-top:24px;}
 
 @media (max-width:900px){
   nav.mainnav{display:none;}
-  .head-icons .search-only{display:flex;}
   .hamburger{display:flex;}
 }
 
@@ -130,17 +134,16 @@ nav.mainnav a.active::after{content:""; position:absolute; left:0; right:0; bott
 
 /* ============ HERO ============ */
 .hero{position:relative; margin:14px 14px 0; border-radius:26px; overflow:hidden; min-height:min(84vh,720px); display:flex; align-items:flex-end;}
-.hero-scape{position:absolute; inset:0;}
-.hero-scrim{position:absolute; inset:0; background:linear-gradient(0deg, rgba(30,16,17,.72) 0%, rgba(30,16,17,.15) 55%, rgba(30,16,17,0) 75%);}
+.hero-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+.hero-scrim{position:absolute; inset:0; background:linear-gradient(0deg, rgba(30,16,17,.80) 0%, rgba(30,16,17,.25) 55%, rgba(30,16,17,0) 80%);}
 .hero-inner{position:relative; z-index:2; padding:56px 40px 56px; color:#fff; max-width:640px;}
 .hero-eyebrow{font-size:13px; letter-spacing:.04em; color:#F0D7D2; margin-bottom:16px; display:block;}
 .hero h1{font-size:clamp(34px,5.6vw,58px); line-height:1.05; color:#fff; font-weight:500;}
 .hero p.sub{margin-top:18px; font-size:17px; color:#F3E4E1; max-width:460px; line-height:1.6;}
 .hero-actions{display:flex; gap:14px; margin-top:32px; flex-wrap:wrap;}
-.hero-float{position:absolute; z-index:2; top:40px; right:40px; background:rgba(255,255,255,.14); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.25); border-radius:16px; padding:16px 18px; color:#fff; max-width:200px; animation:float 6s ease-in-out infinite;}
+.hero-float{position:absolute; z-index:2; top:40px; right:40px; background:rgba(255,255,255,.14); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.25); border-radius:16px; padding:16px 18px; color:#fff; max-width:200px;}
 .hero-float .num{font-family:var(--serif); font-size:26px;}
 .hero-float .lbl{font-size:12px; color:#F3E4E1; margin-top:2px;}
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
 @media (max-width:700px){ .hero{margin:8px 8px 0; border-radius:20px;} .hero-inner{padding:36px 22px 40px;} .hero-float{display:none;} }
 
 /* ============ SECTION SCAFFOLD ============ */
@@ -155,40 +158,25 @@ section{padding:88px 0;}
 .cat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
 .cat-card{position:relative; border-radius:var(--radius); overflow:hidden; aspect-ratio:4/5; cursor:pointer; box-shadow:var(--shadow); transition:transform .35s ease;}
 .cat-card:hover{transform:translateY(-6px);}
-.cat-card .scape{position:absolute; inset:0; transition:transform .6s ease;}
-.cat-card:hover .scape{transform:scale(1.08);}
-.cat-label{position:absolute; left:0; right:0; bottom:0; padding:20px; color:#fff; z-index:2; background:linear-gradient(0deg, rgba(20,10,10,.75), transparent 70%);}
+.cat-card img{width:100%; height:100%; object-fit:cover; transition:transform .6s ease;}
+.cat-card:hover img{transform:scale(1.08);}
+.cat-label{position:absolute; left:0; right:0; bottom:0; padding:20px; color:#fff; z-index:2; background:linear-gradient(0deg, rgba(20,10,10,.8), transparent 70%);}
 .cat-label b{font-family:var(--serif); font-weight:500; font-size:19px; display:block;}
 .cat-label span{font-size:12.5px; color:#F1D9D6;}
-.cat-arrow{position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.9); display:flex; align-items:center; justify-content:center; opacity:0; transform:translate(-6px,6px); transition:opacity .3s ease, transform .3s ease; z-index:2;}
-.cat-card:hover .cat-arrow{opacity:1; transform:translate(0,0);}
 @media (max-width:980px){.cat-grid{grid-template-columns:repeat(2,1fr);}}
-@media (max-width:560px){.cat-grid{grid-template-columns:repeat(2,1fr); gap:12px;} .cat-card{aspect-ratio:3/4;}}
-
-/* ============ PRICE STRIPE ============ */
-.price-row{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
-.price-card{border-radius:var(--radius); padding:26px; background:var(--white); border:1px solid var(--line); position:relative; overflow:hidden; transition:box-shadow .3s ease, transform .3s ease;}
-.price-card:hover{box-shadow:var(--shadow); transform:translateY(-4px);}
-.price-card .tag{font-size:12.5px; color:var(--ink-soft);}
-.price-card .amt{font-family:var(--serif); font-size:26px; margin-top:6px;}
-@media (max-width:760px){.price-row{grid-template-columns:repeat(2,1fr);}}
 
 /* ============ PRODUCT GRID / CARD ============ */
 .prod-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:22px;}
 @media (max-width:980px){.prod-grid{grid-template-columns:repeat(3,1fr);}}
 @media (max-width:700px){.prod-grid{grid-template-columns:repeat(2,1fr); gap:12px;}}
 
-.pcard{background:var(--white); border-radius:16px; overflow:hidden; border:1px solid var(--line); transition:transform .3s ease, box-shadow .3s ease; display:flex; flex-direction:column; perspective:900px;}
+.pcard{background:var(--white); border-radius:16px; overflow:hidden; border:1px solid var(--line); transition:transform .3s ease, box-shadow .3s ease; display:flex; flex-direction:column;}
 .pcard:hover{box-shadow:var(--shadow); transform:translateY(-5px);}
-.pcard-media{position:relative; aspect-ratio:1/1; overflow:hidden;}
-.pcard-media .scape{position:absolute; inset:0; transition:transform .5s ease;}
-.pcard:hover .pcard-media .scape{transform:scale(1.06);}
-.pcard-tilt{transition:transform .25s ease;}
-@media (hover:hover){ .pcard:hover .pcard-tilt{transform:rotateX(2deg) rotateY(-2deg);} }
+.pcard-media{position:relative; aspect-ratio:1/1; overflow:hidden; background:var(--blush);}
 .pcard-badge{position:absolute; top:10px; left:10px; background:var(--rose); color:#fff; font-size:11px; font-weight:700; padding:5px 10px; border-radius:100px; z-index:2;}
 .pcard-wish{position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; z-index:2; transition:transform .2s ease;}
 .pcard-wish:hover{transform:scale(1.1);}
-.pcard-wish svg{width:16px; height:16px; stroke:var(--ink); fill:none; transition:fill .2s ease, stroke .2s ease;}
+.pcard-wish svg{width:16px; height:16px; stroke:var(--ink); fill:none;}
 .pcard-wish.active svg{fill:var(--rose); stroke:var(--rose);}
 .pcard-body{padding:16px; display:flex; flex-direction:column; gap:8px; flex:1;}
 .pcard-cat{font-size:11.5px; color:var(--rose); font-weight:600;}
@@ -205,62 +193,38 @@ section{padding:88px 0;}
 
 /* ============ EDITORIAL SPLIT ============ */
 .split{display:grid; grid-template-columns:1.1fr 1fr; gap:60px; align-items:center;}
-.split .scape{border-radius:22px; aspect-ratio:4/5; box-shadow:var(--shadow);}
-.split .content .kicker{font-size:13px; color:var(--rose); font-weight:600; letter-spacing:.02em;}
+.split-img{border-radius:22px; aspect-ratio:4/5; width:100%; object-fit:cover; box-shadow:var(--shadow);}
+.split .content .kicker{font-size:13px; color:var(--rose); font-weight:600;}
 .split .content h2{margin-top:12px; font-size:clamp(28px,3.6vw,42px); line-height:1.1;}
 .split .content p{margin-top:18px; font-size:16px; max-width:440px;}
-.split .content .btn{margin-top:28px;}
-@media (max-width:860px){.split{grid-template-columns:1fr; gap:30px;} .split.reverse .scape{order:-1;}}
-
-/* ============ CARD ROW (love/relationship + personalize) ============ */
-.tile-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:14px;}
-.tile{background:var(--white); border:1px solid var(--line); border-radius:16px; padding:22px 16px; text-align:left; transition:transform .25s ease, box-shadow .25s ease;}
-.tile:hover{transform:translateY(-4px); box-shadow:var(--shadow);}
-.tile .ti-ico{width:38px; height:38px; margin-bottom:14px; color:var(--rose);}
-.tile b{font-family:var(--serif); font-size:15.5px; font-weight:500; display:block; color:var(--ink);}
-.tile span{font-size:12.5px; color:var(--ink-soft); display:block; margin-top:4px;}
-@media (max-width:980px){.tile-grid{grid-template-columns:repeat(3,1fr);}}
-@media (max-width:560px){.tile-grid{grid-template-columns:repeat(2,1fr);}}
-
-/* ============ GALLERY ============ */
-.gal-grid{display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:150px; gap:12px;}
-.gal-grid .g:nth-child(3n+1){grid-row:span 2;}
-.gal-item{border-radius:14px; overflow:hidden; position:relative;}
-@media (max-width:760px){.gal-grid{grid-template-columns:repeat(2,1fr); grid-auto-rows:120px;}}
+@media (max-width:860px){.split{grid-template-columns:1fr; gap:30px;} .split.reverse .split-img{order:-1;}}
 
 /* ============ SHOP TOOLBAR ============ */
 .shop-toolbar{display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-bottom:28px; background:var(--white); border:1px solid var(--line); border-radius:16px; padding:16px 18px;}
 .search-box{flex:1; min-width:200px; display:flex; align-items:center; gap:10px; background:var(--blush); border-radius:100px; padding:10px 16px;}
 .search-box input{border:none; background:transparent; outline:none; font-size:14px; width:100%; color:var(--ink); font-family:inherit;}
-.search-box svg{width:16px; height:16px; color:var(--ink-soft); flex:none;}
-select, .pill-select{border:1px solid var(--line); background:var(--white); border-radius:100px; padding:10px 16px; font-size:13.5px; color:var(--ink); font-family:inherit;}
+select{border:1px solid var(--line); background:var(--white); border-radius:100px; padding:10px 16px; font-size:13.5px; color:var(--ink); font-family:inherit;}
 .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px;}
 .chip{padding:8px 16px; border-radius:100px; border:1px solid var(--line); font-size:13px; color:var(--ink-soft); background:var(--white); transition:all .2s ease;}
 .chip.active{background:var(--ink); color:var(--cream); border-color:var(--ink);}
-.result-count{font-size:13.5px; color:var(--ink-soft); margin-bottom:18px;}
 
 /* ============ PRODUCT DETAIL ============ */
 .pd-wrap{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:flex-start;}
-.pd-gallery .scape{border-radius:20px; aspect-ratio:1/1; box-shadow:var(--shadow);}
+.pd-gallery-main{border-radius:20px; aspect-ratio:1/1; overflow:hidden; box-shadow:var(--shadow); background:var(--blush);}
+.pd-gallery-main img{width:100%; height:100%; object-fit:cover;}
 .pd-thumbs{display:flex; gap:10px; margin-top:12px;}
-.pd-thumbs .scape{width:64px; height:64px; border-radius:10px; box-shadow:none; border:2px solid transparent; cursor:pointer;}
-.pd-thumbs .scape.active{border-color:var(--rose);}
-.pd-info .pcard-cat{font-size:13px;}
-.pd-info h1{font-size:clamp(26px,3vw,34px); margin-top:8px;}
-.pd-info .pcard-rate{margin-top:10px;}
+.pd-thumbs img{width:64px; height:64px; border-radius:10px; object-fit:cover; border:2px solid transparent; cursor:pointer;}
+.pd-thumbs img.active{border-color:var(--rose);}
 .pd-price{display:flex; align-items:baseline; gap:12px; margin-top:18px;}
 .pd-price .now{font-family:var(--serif); font-size:32px;}
 .pd-price .old{font-size:16px; text-decoration:line-through; color:var(--ink-soft);}
 .pd-price .off{background:var(--blush); color:var(--rose-deep); padding:4px 10px; border-radius:100px; font-size:12.5px; font-weight:700;}
-.pd-info p.desc{margin-top:18px; font-size:15px;}
 .pd-feat{margin-top:20px; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
 .pd-feat li{display:flex; gap:10px; font-size:14px; color:var(--ink-soft);}
 .pd-feat li svg{width:16px; height:16px; color:var(--rose); flex:none; margin-top:2px;}
 .pd-cta-row{display:flex; gap:12px; margin-top:28px;}
 .pd-why{margin-top:32px; background:var(--blush); border-radius:16px; padding:22px;}
-.pd-why h4{font-family:var(--serif); font-size:17px; margin-bottom:10px;}
 .sticky-shop{position:fixed; left:0; right:0; bottom:0; z-index:50; background:var(--white); border-top:1px solid var(--line); padding:14px 18px calc(14px + env(safe-area-inset-bottom,0px)); display:none; align-items:center; justify-content:space-between; gap:14px; box-shadow:0 -10px 30px rgba(0,0,0,.08);}
-.sticky-shop .p{font-family:var(--serif); font-size:17px;}
 @media (max-width:860px){ .pd-wrap{grid-template-columns:1fr; gap:30px;} .sticky-shop.show{display:flex;} }
 
 /* ============ FOOTER ============ */
@@ -272,45 +236,16 @@ footer a:hover{color:#fff;}
 .foot-desc{margin-top:12px; font-size:14px; color:#C9B7B1; max-width:260px;}
 .foot-col h5{font-size:13px; letter-spacing:.03em; color:#fff; margin-bottom:16px; font-weight:600;}
 .foot-col a{display:block; font-size:13.5px; margin-bottom:11px;}
-.foot-social{display:flex; gap:12px; margin-top:20px;}
-.foot-social a{width:36px; height:36px; border:1px solid #4a3d38; border-radius:50%; display:flex; align-items:center; justify-content:center;}
 .foot-bottom{border-top:1px solid #3d3330; margin-top:50px; padding-top:24px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:12.5px; color:#9C8A84;}
 .foot-disclosure{font-size:12px; color:#9C8A84; max-width:760px; line-height:1.6; margin-top:24px; padding-top:24px; border-top:1px solid #3d3330;}
 @media (max-width:860px){.foot-grid{grid-template-columns:1fr 1fr; gap:32px;}}
 
-/* ============ SIMPLE CONTENT PAGES ============ */
-.page-hero{padding:64px 0 20px;}
-.page-hero h1{font-size:clamp(30px,4vw,44px);}
-.page-hero p{margin-top:14px; max-width:560px;}
-.content-page{padding:20px 0 90px;}
-.content-page h2{font-size:22px; margin-top:36px; margin-bottom:12px;}
-.content-page p{margin-bottom:12px; font-size:15px;}
-.content-page ul{color:var(--ink-soft); font-size:15px; line-height:1.8; padding-left:20px;}
-.faq-item{border-bottom:1px solid var(--line); padding:18px 0;}
-.faq-q{display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-family:var(--serif); font-size:17px;}
-.faq-a{max-height:0; overflow:hidden; transition:max-height .3s ease; font-size:14.5px; color:var(--ink-soft);}
-.faq-item.open .faq-a{max-height:200px; margin-top:12px;}
-.faq-item.open .faq-q svg{transform:rotate(45deg);}
-.faq-q svg{transition:transform .25s ease; width:18px; height:18px;}
-.contact-grid{display:grid; grid-template-columns:1fr 1fr; gap:50px; margin-top:30px;}
-.form-field{margin-bottom:16px;}
-.form-field label{font-size:13px; color:var(--ink-soft); display:block; margin-bottom:6px;}
-.form-field input, .form-field textarea{width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-family:inherit; font-size:14px; background:var(--white); color:var(--ink); outline:none;}
-.form-field input:focus, .form-field textarea:focus{border-color:var(--rose);}
-@media (max-width:760px){.contact-grid{grid-template-columns:1fr;}}
 .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--cream); padding:13px 22px; border-radius:100px; font-size:13.5px; opacity:0; pointer-events:none; transition:all .3s ease; z-index:200;}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-.notfound{padding:120px 0; text-align:center;}
-.notfound h1{font-size:96px; color:var(--rose);}
-
 #view{min-height:60vh;}
-.overflow-x{overflow-x:auto;}
-.skip-link{position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:200;}
-.skip-link:focus{left:12px; top:12px;}
 </style>
 </head>
 <body>
-<a class="skip-link" href="#view">Skip to content</a>
 
 <header>
   <div class="wrap headbar">
@@ -324,22 +259,10 @@ footer a:hover{color:#fff;}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20s-7-4.35-9.5-8.5C.7 8 2 4.5 5.5 4c2-.3 3.7.7 4.5 2.2C10.8 4.7 12.5 3.7 14.5 4 18 4.5 19.3 8 21.5 11.5 19 15.65 12 20 12 20z"/></svg>
         <span class="wish-count" id="wishCount" style="display:none;">0</span>
       </button>
-      <div class="social-mini" style="display:none" id="socialDesktop">
-        <a href="https://www.instagram.com/jodigoals.in/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1"/></svg></a>
-        <a href="https://pin.it/4eSYWDDDv" target="_blank" rel="noopener" aria-label="Pinterest"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9 17c1-3 1.6-5.4 2-7.3a2.3 2.3 0 1 1 4.4-1c0 1.6-1 4-1.6 5.6-.4 1.2.4 2.2 1.6 2.2 2 0 3.4-2.5 3.4-5.4 0-2.8-2-4.9-5.2-4.9-3.7 0-5.9 2.8-5.9 5.6 0 1 .3 1.7.8 2.3"/></svg></a>
-        <a href="https://www.youtube.com/@JodiGoals" target="_blank" rel="noopener" aria-label="YouTube"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9.5v5l5-2.5z" fill="currentColor" stroke="none"/></svg></a>
-      </div>
       <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
-  <div class="mobile-panel" id="mobilePanel">
-    <div id="mobileNav"></div>
-    <div class="msocial">
-      <a href="https://www.instagram.com/jodigoals.in/" target="_blank" rel="noopener">Instagram</a>
-      <a href="https://pin.it/4eSYWDDDv" target="_blank" rel="noopener">Pinterest</a>
-      <a href="https://www.youtube.com/@JodiGoals" target="_blank" rel="noopener">YouTube</a>
-    </div>
-  </div>
+  <div class="mobile-panel" id="mobilePanel"><div id="mobileNav"></div></div>
 </header>
 
 <main id="view" role="main"></main>
@@ -350,11 +273,6 @@ footer a:hover{color:#fff;}
       <div>
         <div class="foot-logo">Jodi<em style="color:#D98891; font-style:normal;">Goals</em></div>
         <p class="foot-desc">Everything couples love, in one place.</p>
-        <div class="foot-social">
-          <a href="https://www.instagram.com/jodigoals.in/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
-          <a href="https://pin.it/4eSYWDDDv" target="_blank" rel="noopener" aria-label="Pinterest"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/></svg></a>
-          <a href="https://www.youtube.com/@JodiGoals" target="_blank" rel="noopener" aria-label="YouTube"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="6" width="18" height="12" rx="3"/></svg></a>
-        </div>
       </div>
       <div class="foot-col">
         <h5>Shop</h5>
@@ -368,18 +286,18 @@ footer a:hover{color:#fff;}
         <a href="#/love-relationship">Love & Relationship</a>
         <a href="#/travel">Travel</a>
         <a href="#/marriage">Marriage</a>
-        <a href="#/shop">Gift Ideas</a>
       </div>
       <div class="foot-col">
         <h5>Support</h5>
         <a href="#/contact">Contact</a>
         <a href="#/faq">FAQ</a>
         <a href="#/privacy">Privacy</a>
-        <a href="#/terms">Terms</a>
         <a href="#/affiliate-disclosure">Affiliate Disclosure</a>
       </div>
     </div>
-    <div class="foot-disclosure">As an Amazon Associate–style affiliate partner, JodiGoals may earn a commission from qualifying purchases made through links on this site, at no extra cost to you. This helps us keep curating gifts for couples. <a href="#/affiliate-disclosure">Read our full disclosure</a>.</div>
+    <div class="foot-disclosure">
+      As an Amazon Associate, JodiGoals earns from qualifying purchases made through links on this site at no extra cost to you.
+    </div>
     <div class="foot-bottom">
       <span>© <span id="yr"></span> JodiGoals. All rights reserved.</span>
       <span>Made for couples who notice the little things.</span>
@@ -388,41 +306,174 @@ footer a:hover{color:#fff;}
 </footer>
 
 <div class="sticky-shop" id="stickyShop">
-  <div class="p" id="stickyPrice">₹0</div>
+  <div class="p" id="stickyPrice" style="font-family:var(--serif); font-size:18px;">₹0</div>
   <a class="btn btn-primary" id="stickyBtn" target="_blank" rel="noopener">Shop on Amazon</a>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 /* =====================================================================
-   JODIGOALS — product data
-   Edit this array to add products, swap prices, images or Amazon links.
-   `art` picks a decorative palette (0 or 1) — purely visual, optional.
+   JODIGOALS — REAL PRODUCT CATALOG (Curated high-res imagery)
 ===================================================================== */
 const PRODUCTS = [
-  { id:'led-lamp-forever', name:'Love Forever Custom LED Lamp', cat:'personalized', catLabel:'Personalized', tag:['couples'], price:849, old:1199, rating:4.6, reviews:212, desc:'A warm-glow acrylic lamp engraved with your names or a date, for the nightstand you now share.', features:['Engraved with names or a custom date','Warm LED glow, USB powered','Acrylic base, breaks gently not sharply','Ships with gift box'], amazon:'https://www.amazon.in/s?k=custom+led+lamp+couple&tag=YOURTAG-21', art:0 },
-  { id:'rose-bouquet-red', name:'Passionate Red Rose Bouquet', cat:'romantic', catLabel:'Romantic Gifts', tag:['her'], price:1499, old:1899, rating:4.4, reviews:340, desc:'Twelve long-stem roses, hand-tied with kraft wrap — classic, and classic for a reason.', features:['12 fresh-cut long-stem roses','Hand-tied kraft & twine wrap','Same-city delivery windows available','Care card included'], amazon:'https://www.amazon.in/s?k=red+rose+bouquet&tag=YOURTAG-21', art:1 },
-  { id:'photo-jigsaw', name:'Custom Photo Jigsaw Puzzle', cat:'personalized', catLabel:'Personalized', tag:['couples'], price:549, old:749, rating:4.5, reviews:158, desc:'Your favourite photo, cut into 500 pieces of a slow Sunday afternoon.', features:['500-piece premium cardboard','Upload any photo at checkout on Amazon listing','Matte finish, no glare','Comes in a keepsake tin'], amazon:'https://www.amazon.in/s?k=custom+photo+jigsaw+puzzle&tag=YOURTAG-21', art:0 },
-  { id:'keepsake-speaker', name:'Couple Keepsake LED Speaker', cat:'personalized', catLabel:'Personalized', tag:['couples'], price:799, old:999, rating:4.3, reviews:97, desc:'A Bluetooth speaker that doubles as a soft night-light, engraved just for the two of you.', features:['Bluetooth 5.0, 6-hour battery','Touch-control LED base','Custom name/date engraving','Compact travel size'], amazon:'https://www.amazon.in/s?k=couple+led+bluetooth+speaker&tag=YOURTAG-21', art:1 },
-  { id:'matching-hoodies', name:'His & Her Matching Hoodie Set', cat:'fashion', catLabel:'Couple Fashion', tag:['couples'], price:1899, old:2499, rating:4.2, reviews:76, desc:'Heavyweight cotton hoodies in a shared colourway — comfortable enough for actual wear.', features:['320 GSM heavyweight cotton','Available S–XXL, unisex fit','Machine washable','Sold as a set of two'], amazon:'https://www.amazon.in/s?k=matching+couple+hoodie+set&tag=YOURTAG-21', art:0 },
-  { id:'promise-rings', name:'Sterling Silver Promise Ring Duo', cat:'jewellery', catLabel:'Jewellery', tag:['couples'], price:2299, old:2999, rating:4.7, reviews:184, desc:'Two thin bands, one quiet promise. 925 sterling silver with a brushed matte finish.', features:['925 sterling silver, hypoallergenic','Brushed matte finish','Sizes 5–13 available','Presented in a velvet box'], amazon:'https://www.amazon.in/s?k=couple+promise+rings+silver&tag=YOURTAG-21', art:1 },
-  { id:'name-necklace', name:'Custom Couple Name Necklace', cat:'jewellery', catLabel:'Jewellery', tag:['her'], price:1099, old:1499, rating:4.5, reviews:231, desc:'A dainty gold-plated chain with both your names, side by side, always.', features:['18k gold-plated, tarnish resistant','Adjustable 16–18 inch chain','Choose up to 2 names at checkout','Gift-ready packaging'], amazon:'https://www.amazon.in/s?k=custom+couple+name+necklace&tag=YOURTAG-21', art:0 },
-  { id:'travel-journal', name:'Our Story Travel Journal Set', cat:'travel', catLabel:'Couple Travel', tag:['couples'], price:699, old:899, rating:4.6, reviews:64, desc:'A guided journal for two, with prompts for every trip you take from here on.', features:['120 guided pages','Includes 2 fine-liner pens','Elastic closure & ribbon marker','Pocket for tickets & photos'], amazon:'https://www.amazon.in/s?k=couple+travel+journal&tag=YOURTAG-21', art:1 },
-  { id:'ethnic-set', name:'Coordinated Ethnic Couple Set', cat:'fashion', catLabel:'Couple Fashion', tag:['couples'], price:3299, old:4199, rating:4.1, reviews:52, desc:'A kurta and saree pairing in a shared palette — for the festival photos you\u2019ll keep.', features:['Cotton-blend, breathable weave','Available in 4 colourways','Sizes S–XXL / free-size saree','Dry clean recommended'], amazon:'https://www.amazon.in/s?k=coordinated+ethnic+couple+set&tag=YOURTAG-21', art:0 },
-  { id:'anniversary-hamper', name:'Anniversary Cake & Combo Hamper', cat:'cakes', catLabel:'Cakes & Combos', tag:['couples'], price:1299, old:1599, rating:4.4, reviews:143, desc:'Eggless chocolate cake, two mugs, and a card that says what you meant to.', features:['500g eggless chocolate cake','2 matching ceramic mugs','Handwritten-style greeting card','Same-day delivery in select cities'], amazon:'https://www.amazon.in/s?k=anniversary+cake+combo+hamper&tag=YOURTAG-21', art:1 },
-  { id:'wedding-frame', name:'Personalized Wedding Photo Frame', cat:'marriage', catLabel:'Wedding & Marriage', tag:['couples'], price:999, old:1299, rating:4.5, reviews:88, desc:'A solid-wood frame engraved with your wedding date, for the photo you actually love.', features:['Solid mango wood, walnut finish','Engraved date or short quote','Fits 8x10 photo','Tabletop or wall-mount'], amazon:'https://www.amazon.in/s?k=personalized+wedding+photo+frame&tag=YOURTAG-21', art:0 },
-  { id:'cufflinks', name:'Engraved Groom Cufflinks', cat:'jewellery', catLabel:'Jewellery', tag:['him'], price:1199, old:1599, rating:4.3, reviews:41, desc:'Stainless steel cufflinks with a small engraved initial — sharp, understated.', features:['Surgical-grade stainless steel','Custom single initial engraving','Gift box included','Tarnish and scratch resistant'], amazon:'https://www.amazon.in/s?k=engraved+cufflinks+groom&tag=YOURTAG-21', art:1 },
+  {
+    id:'led-lamp-forever',
+    name:'Love Forever Custom LED Lamp',
+    cat:'personalized',
+    catLabel:'Personalized',
+    tag:['couples'],
+    price:849,
+    old:1199,
+    rating:4.6,
+    reviews:212,
+    desc:'A warm-glow acrylic lamp engraved with your names or a special anniversary date, for the nightstand you share.',
+    features:['Custom laser engraved names & date','Warm 3000K soothing night LED','USB plug-and-play with switch','Supplied in premium gift box packaging'],
+    image:'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80',
+    gallery:[
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&auto=format&fit=crop&q=80'
+    ],
+    amazon:'https://www.amazon.in/s?k=custom+led+lamp+couple&tag=YOURTAG-21'
+  },
+  {
+    id:'rose-bouquet-red',
+    name:'Passionate Red Rose Bouquet',
+    cat:'romantic',
+    catLabel:'Romantic Gifts',
+    tag:['her'],
+    price:1499,
+    old:1899,
+    rating:4.8,
+    reviews:340,
+    desc:'Twelve hand-selected velvety long-stem roses wrapped in textured European kraft paper.',
+    features:['12 fresh-cut long stem red roses','Handcrafted eco-friendly wrapper with silk ribbon','Hydration pack ensures fresh doorstep arrival','Personalized greeting note included'],
+    image:'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80',
+    gallery:[
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800&auto=format&fit=crop&q=80'
+    ],
+    amazon:'https://www.amazon.in/s?k=red+rose+bouquet&tag=YOURTAG-21'
+  },
+  {
+    id:'photo-jigsaw',
+    name:'Custom Photo Keepsake Jigsaw Puzzle',
+    cat:'personalized',
+    catLabel:'Personalized',
+    tag:['couples'],
+    price:549,
+    old:749,
+    rating:4.5,
+    reviews:158,
+    desc:'Your favourite couple memory transformed into a 500-piece puzzle for cozy weekend afternoons together.',
+    features:['500 precision-cut thick chipboard pieces','Matte velvet finish prevents table glare','Ships inside customized keepsake tin','High definition color reproduction'],
+    image:'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=800&auto=format&fit=crop&q=80',
+    gallery:[
+      'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=800&auto=format&fit=crop&q=80'
+    ],
+    amazon:'https://www.amazon.in/s?k=custom+photo+jigsaw+puzzle&tag=YOURTAG-21'
+  },
+  {
+    id:'matching-hoodies',
+    name:'Cozy Unisex Couple Matching Hoodies',
+    cat:'fashion',
+    catLabel:'Couple Fashion',
+    tag:['couples'],
+    price:1899,
+    old:2499,
+    rating:4.4,
+    reviews:98,
+    desc:'Super soft, heavyweight cotton fleece hoodies styled in harmonious complementary earth tones.',
+    features:['340 GSM 100% combed bio-wash cotton','Pre-shrunk, ultra-soft brushed fleece lining','Relaxed aesthetic drop-shoulder fit','Sold as a complete coordinating pair'],
+    image:'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&auto=format&fit=crop&q=80',
+    gallery:[
+      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?w=800&auto=format&fit=crop&q=80'
+    ],
+    amazon:'https://www.amazon.in/s?k=matching+couple+hoodie+set&tag=YOURTAG-21'
+  },
+  {
+    id:'promise-rings',
+    name:'925 Sterling Silver Promise Band Duo',
+    cat:'jewellery',
+    catLabel:'Jewellery',
+    tag:['couples'],
+    price:2299,
+    old:2999,
+    rating:4.7,
+    reviews:184,
+    desc:'Two minimalist, brushed finish matching rings forged from certified 925 sterling silver.',
+    features:['Solid 925 Sterling Silver with stamp','Comfort-fit curved interior edge','Hypoallergenic & nickel-free for everyday wear','Accompanied by a plush velvet presentation box'],
+    image:'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80',
+    gallery:[
+      'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80'
+    ],
+    amazon:'https://www.amazon.in/s?k=couple+promise+rings+silver&tag=YOURTAG-21'
+  },
+  {
+    id:'name-necklace',
+    name:'Custom Couple Name Bar Pendant',
+    cat:'jewellery',
+    catLabel:'Jewellery',
+    tag:['her'],
+    price:1099,
+    old:1499,
+    rating:4.5,
+    reviews:231,
+    desc:'Dainty 18K gold-plated necklace engraved with both of your names united by an infinity symbol.',
+    features:['Tarnish-resistant 18K gold vermeil finish','Adjustable cable chain 16–18 inches','Precision micro-laser engraved script','Water-safe and anti-rust alloy base'],
+    image:'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80',
+    gallery:[
+      'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80'
+    ],
+    amazon:'https://www.amazon.in/s?k=custom+couple+name+necklace&tag=YOURTAG-21'
+  },
+  {
+    id:'travel-journal',
+    name:'Our Adventures Couple Travel Journal',
+    cat:'travel',
+    catLabel:'Couple Travel',
+    tag:['couples'],
+    price:699,
+    old:899,
+    rating:4.6,
+    reviews:64,
+    desc:'A bespoke hardcover guided diary with packing checklists, map pins, and polaroid sleeves for travels together.',
+    features:['160gsm archival thick bleed-proof paper','Includes 50 romantic city bucket-list prompts','Back accordion folder for tickets & passes','Dual ribbon place-markers and elastic band'],
+    image:'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80',
+    gallery:[
+      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80'
+    ],
+    amazon:'https://www.amazon.in/s?k=couple+travel+journal&tag=YOURTAG-21'
+  },
+  {
+    id:'anniversary-hamper',
+    name:'Decadent Belgian Truffle Cake & Hamper',
+    cat:'cakes',
+    catLabel:'Cakes & Combos',
+    tag:['couples'],
+    price:1299,
+    old:1599,
+    rating:4.6,
+    reviews:143,
+    desc:'Rich 500g dark chocolate ganache cake paired with his & her artisanal coffee mugs and scented candle.',
+    features:['Eggless fresh-baked Belgian chocolate truffle','2 handcrafted ceramic speckled mugs','Soy wax French vanilla votive candle','Same-day insulated temperature-controlled box'],
+    image:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&auto=format&fit=crop&q=80',
+    gallery:[
+      'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&auto=format&fit=crop&q=80'
+    ],
+    amazon:'https://www.amazon.in/s?k=anniversary+cake+combo+hamper&tag=YOURTAG-21'
+  }
 ];
 
 const CATEGORIES = [
-  { slug:'couple-gifts', label:'Couple Gifts', sub:'For every occasion', filterCat:null },
-  { slug:'couple-fashion', label:'Couple Fashion', sub:'Dress the part, together', filterCat:'fashion' },
-  { slug:'personalized', label:'Personalized Gifts', sub:'Made just for two', filterCat:'personalized' },
-  { slug:'jewellery', label:'Jewellery', sub:'Small things, kept forever', filterCat:'jewellery' },
-  { slug:'romantic', label:'Romantic Gifts', sub:'Old-fashioned, on purpose', filterCat:'romantic' },
-  { slug:'cakes', label:'Cakes & Combos', sub:'Sweet, shared', filterCat:'cakes' },
-  { slug:'travel', label:'Couple Travel', sub:'Two tickets, one map', filterCat:'travel' },
-  { slug:'marriage', label:'Wedding & Marriage', sub:'For the ones just starting', filterCat:'marriage' },
+  { slug:'couple-gifts', label:'Couple Gifts', sub:'For every occasion', filterCat:null, img:'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&auto=format&fit=crop&q=80' },
+  { slug:'couple-fashion', label:'Couple Fashion', sub:'Dress the part, together', filterCat:'fashion', img:'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&auto=format&fit=crop&q=80' },
+  { slug:'personalized', label:'Personalized Gifts', sub:'Made just for two', filterCat:'personalized', img:'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&auto=format&fit=crop&q=80' },
+  { slug:'jewellery', label:'Jewellery', sub:'Small things, kept forever', filterCat:'jewellery', img:'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&auto=format&fit=crop&q=80' },
+  { slug:'romantic', label:'Romantic Gifts', sub:'Timeless romance', filterCat:'romantic', img:'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80' },
+  { slug:'cakes', label:'Cakes & Combos', sub:'Sweet moments shared', filterCat:'cakes', img:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80' },
+  { slug:'travel', label:'Couple Travel', sub:'Two tickets, one map', filterCat:'travel', img:'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80' },
+  { slug:'marriage', label:'Wedding & Marriage', sub:'For the ones just starting', filterCat:'marriage', img:'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&auto=format&fit=crop&q=80' }
 ];
 
 const NAV = [
@@ -432,15 +483,26 @@ const NAV = [
   {href:'#/shop/personalized', label:'Personalized'},
   {href:'#/shop/jewellery', label:'Jewellery'},
   {href:'#/love-relationship', label:'Love & Relationship'},
-  {href:'#/travel', label:'Travel'},
-  {href:'#/marriage', label:'Marriage'},
+  {href:'#/travel', label:'Travel'}
 ];
 
-/* ---------- helpers ---------- */
+/* ---------- HELPERS & GOOGLE ANALYTICS HOOKS ---------- */
 const $ = (s,el=document)=>el.querySelector(s);
 const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
 const fmt = n => '₹' + n.toLocaleString('en-IN');
 const pct = (p,o) => Math.round((1 - p/o)*100);
+
+// GA4 Affiliate Event Tracker
+function trackAffiliateClick(productId, productName, outboundUrl){
+  if (typeof gtag === 'function') {
+    gtag('event', 'affiliate_click', {
+      event_category: 'outbound_ecommerce',
+      event_label: productName,
+      item_id: productId,
+      outbound_url: outboundUrl
+    });
+  }
+}
 
 let wishlist = [];
 try{ wishlist = JSON.parse(localStorage.getItem('jg_wishlist')||'[]'); }catch(e){ wishlist = []; }
@@ -462,28 +524,15 @@ function toast(msg){
 }
 
 function lineHeart(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.35-9.5-8.5C.7 8 2 4.5 5.5 4c2-.3 3.7.7 4.5 2.2C10.8 4.7 12.5 3.7 14.5 4 18 4.5 19.3 8 21.5 11.5 19 15.65 12 20 12 20z"/></svg>`; }
-function lineArrow(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`; }
 function lineCheck(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>`; }
-function linePlus(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>`; }
 
-/* decorative couple/floral line-art used inside .scape panels, not literal photos */
-const LINE_ART = [
-`<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.4"><circle cx="150" cy="190" r="46"/><circle cx="240" cy="200" r="52"/><path d="M110 260c10 60 40 90 90 90M330 270c-8 55-45 85-95 85" /><path d="M60 420c40-40 90-55 140-45M400 430c-50-35-110-45-160-30"/></g><g fill="rgba(255,255,255,.28)"><circle cx="70" cy="70" r="3"/><circle cx="330" cy="60" r="4"/><circle cx="360" cy="150" r="2.5"/><circle cx="40" cy="200" r="2.5"/></g></svg>`,
-`<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.3"><path d="M200 60c-30 0-50 25-50 55 0 45 50 80 50 80s50-35 50-80c0-30-20-55-50-55z"/><path d="M90 300c20-15 45-15 65 0M245 300c20-15 45-15 65 0"/><path d="M80 400c60-20 180-20 240 0"/></g><g fill="rgba(255,255,255,.3)"><circle cx="90" cy="120" r="3"/><circle cx="320" cy="110" r="2.5"/><circle cx="350" cy="420" r="3"/></g></svg>`
-];
-
-function scapeEl(seed, alt){
-  const art = LINE_ART[seed % LINE_ART.length];
-  return `<div class="scape${alt?' alt':''} grain">${art}</div>`;
-}
-
-/* ---------- product card ---------- */
+/* ---------- PRODUCT CARD WITH REAL IMAGES ---------- */
 function productCard(p){
   const wished = wishlist.includes(p.id);
   return `
   <article class="pcard">
-    <a href="#/product/${p.id}" class="pcard-media pcard-tilt" aria-label="${p.name}">
-      ${scapeEl(p.art, p.art===1)}
+    <a href="#/product/${p.id}" class="pcard-media" aria-label="${p.name}">
+      <img src="${p.image}" alt="${p.name}" class="prod-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'">
       ${p.old ? `<span class="pcard-badge">${pct(p.price,p.old)}% off</span>` : ''}
       <button class="pcard-wish ${wished?'active':''}" data-id="${p.id}" onclick="event.preventDefault();toggleWish('${p.id}')" aria-label="Add to wishlist">${lineHeart()}</button>
     </a>
@@ -494,19 +543,29 @@ function productCard(p){
       <div class="pcard-rate"><span class="stars">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5-Math.round(p.rating))}</span> ${p.rating} (${p.reviews})</div>
       <div class="pcard-price"><span class="now">${fmt(p.price)}</span>${p.old?`<span class="old">${fmt(p.old)}</span><span class="off">${pct(p.price,p.old)}% off</span>`:''}</div>
       <div class="pcard-cta">
-        <a class="btn btn-primary btn-sm" href="${p.amazon}" target="_blank" rel="noopener sponsored">Shop Now</a>
+        <a class="btn btn-primary btn-sm" href="${p.amazon}" target="_blank" rel="noopener sponsored" onclick="trackAffiliateClick('${p.id}', '${p.name.replace(/'/g,"\\'")}', this.href)">Shop Now</a>
         <a class="btn btn-light btn-sm" href="#/product/${p.id}">Details</a>
       </div>
     </div>
   </article>`;
 }
 
-/* ---------- routing ---------- */
+/* ---------- ROUTING & GA4 VIRTUAL PAGEVIEWS ---------- */
 function route(){
   const hash = location.hash || '#/';
   const parts = hash.replace('#/','').split('/').filter(Boolean);
   closeMobile();
   window.scrollTo({top:0, behavior:'instant' in window ? 'instant':'auto'});
+
+  // Trigger Google Analytics Virtual Pageview for SPA
+  if (typeof gtag === 'function') {
+    gtag('event', 'page_view', {
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: hash
+    });
+  }
+
   if(parts.length===0) return renderHome();
   if(parts[0]==='shop' && parts[1]) return renderShop(parts[1]);
   if(parts[0]==='shop') return renderShop(null);
@@ -514,44 +573,33 @@ function route(){
   if(parts[0]==='love-relationship') return renderSimplePage('love');
   if(parts[0]==='travel') return renderSimplePage('travel');
   if(parts[0]==='marriage') return renderSimplePage('marriage');
-  if(parts[0]==='about') return renderAbout();
-  if(parts[0]==='contact') return renderContact();
-  if(parts[0]==='faq') return renderFaq();
-  if(parts[0]==='privacy') return renderLegal('privacy');
-  if(parts[0]==='terms') return renderLegal('terms');
-  if(parts[0]==='affiliate-disclosure') return renderLegal('affiliate');
-  return render404();
+  renderHome();
 }
 window.addEventListener('hashchange', route);
 
-function setActiveNav(){
-  $$('.mainnav a').forEach(a=>a.classList.toggle('active', a.getAttribute('href')===location.hash || (location.hash==='' && a.getAttribute('href')==='#/')));
-}
-
 function mount(html){
   $('#view').innerHTML = html;
-  document.title = $('#view [data-title]') ? $('#view [data-title]').dataset.title : 'JodiGoals – Couple Gifts, Fashion, Love & Lifestyle';
-  setActiveNav();
+  document.title = $('#view [data-title]') ? $('#view [data-title]').dataset.title : 'JodiGoals – Couple Gifts & Fashion';
+  $$('.mainnav a').forEach(a=>a.classList.toggle('active', a.getAttribute('href')===location.hash || (location.hash==='' && a.getAttribute('href')==='#/')));
   initReveal();
   $('#stickyShop').classList.remove('show');
 }
 
-/* ---------- HOME ---------- */
+/* ---------- HOME VIEW ---------- */
 function renderHome(){
   mount(`
-  <div data-title="JodiGoals – Couple Gifts, Fashion, Love & Lifestyle"></div>
-
+  <div data-title="JodiGoals – Couple Gifts, Fashion & Lifestyle"></div>
   <section class="hero" style="padding:0;">
-    <div class="hero-scape">${scapeEl(0,false)}</div>
+    <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1600&auto=format&fit=crop&q=80" alt="Couples in love" class="hero-bg">
     <div class="hero-scrim"></div>
     <div class="hero-float">
-      <div class="num">4.6★</div>
-      <div class="lbl">Loved by couples across India</div>
+      <div class="num">4.7★</div>
+      <div class="lbl">Handpicked by couples, for couples</div>
     </div>
     <div class="hero-inner">
-      <span class="hero-eyebrow">A destination for two</span>
+      <span class="hero-eyebrow">A curated sanctuary for two</span>
       <h1>Make every moment a JodiGoals moment.</h1>
-      <p class="sub">Discover gifts, fashion and little things that make two hearts feel closer.</p>
+      <p class="sub">Discover thoughtful gifts, couple fashion, matching jewellery and little things that make two hearts feel closer.</p>
       <div class="hero-actions">
         <a href="#/shop/couple-gifts" class="btn btn-primary">Explore Gifts</a>
         <a href="#/shop/couple-fashion" class="btn btn-light">Discover Couple Fashion</a>
@@ -561,385 +609,183 @@ function renderHome(){
 
   <section class="wrap">
     <div class="section-head reveal">
-      <div><h2>Find something special for two</h2><p>Eight ways to say it, whatever the occasion.</p></div>
+      <div><h2>Find something special for two</h2><p>Curated categories to celebrate your story.</p></div>
     </div>
     <div class="cat-grid reveal">
-      ${CATEGORIES.map((c,i)=>`
+      ${CATEGORIES.map(c=>`
         <a href="#/shop/${c.slug}" class="cat-card">
-          ${scapeEl(i, i%2===1)}
-          <div class="cat-arrow">${lineArrow()}</div>
+          <img src="${c.img}" alt="${c.label}" loading="lazy">
           <div class="cat-label"><b>${c.label}</b><span>${c.sub}</span></div>
         </a>`).join('')}
     </div>
   </section>
 
   <section class="wrap">
-    <div class="section-head reveal"><div><h2>Gifts for every budget</h2></div></div>
-    <div class="price-row reveal">
-      ${[['Under ₹499','#/shop?maxPrice=499'],['Under ₹999','#/shop?maxPrice=999'],['Under ₹1,499','#/shop?maxPrice=1499'],['Premium Gifts','#/shop?maxPrice=99999&min=1500']]
-        .map(([label,href])=>`<a class="price-card" href="${href.split('?')[0]}"><span class="tag">Shop</span><div class="amt">${label}</div></a>`).join('')}
-    </div>
-  </section>
-
-  <section class="wrap">
     <div class="section-head reveal">
-      <div><h2>Trending couple picks</h2><p>The ones people keep coming back for.</p></div>
+      <div><h2>Trending couple picks</h2><p>Popular anniversary and celebration keepsakes.</p></div>
       <a href="#/shop" class="btn btn-ghost">View all</a>
     </div>
     <div class="prod-grid reveal">
-      ${PRODUCTS.slice(0,8).map(productCard).join('')}
+      ${PRODUCTS.map(productCard).join('')}
     </div>
   </section>
 
   <section class="wrap">
     <div class="split reveal">
-      <div class="scape alt">${scapeEl(1,true)}</div>
+      <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=900&auto=format&fit=crop&q=80" alt="Couple moments" class="split-img">
       <div class="content">
-        <span class="kicker">Featured collection</span>
+        <span class="kicker">Curated with heart</span>
         <h2>Because ordinary gifts aren't enough.</h2>
-        <p>Discover thoughtful gifts, fashion and romantic finds for the moments you want to remember.</p>
-        <a href="#/shop" class="btn btn-primary">Explore Collection</a>
+        <p>From engraved keepsake lamps to coordinated loungewear, every item is evaluated for how it feels when opened together.</p>
+        <a href="#/shop" class="btn btn-primary" style="margin-top:20px;">Explore Collection</a>
       </div>
-    </div>
-  </section>
-
-  <section class="wrap">
-    <div class="section-head reveal">
-      <div><h2>Couple fashion goals</h2><p>Coordinated, not costume-y.</p></div>
-      <a href="#/shop/couple-fashion" class="btn btn-ghost">Shop fashion</a>
-    </div>
-    <div class="tile-grid reveal">
-      ${['Matching Outfits',"Women's Fashion","Men's Fashion",'Couple Accessories','Jewellery','Ethnic Couple Looks'].map((t,i)=>`
-        <a class="tile" href="#/shop/couple-fashion">
-          <div class="ti-ico">${lineHeart()}</div>
-          <b>${t}</b><span>Shop the edit</span>
-        </a>`).join('')}
-    </div>
-  </section>
-
-  <section class="wrap">
-    <div class="split reverse reveal">
-      <div class="content">
-        <span class="kicker">Personalized</span>
-        <h2>Make it personal.</h2>
-        <p>Custom LED lamps, photo puzzles, name necklaces and more — made to carry your names, your dates, your story.</p>
-        <a href="#/shop/personalized" class="btn btn-primary">Explore Personalized Gifts</a>
-      </div>
-      <div class="scape">${scapeEl(0,false)}</div>
-    </div>
-  </section>
-
-  <section class="wrap">
-    <div class="section-head reveal"><div><h2>More than just gifts</h2><p>Ideas, inspiration and a little guidance for the relationship side of things.</p></div></div>
-    <div class="tile-grid reveal" style="grid-template-columns:repeat(3,1fr);">
-      ${[['Relationship Ideas','#/love-relationship'],['Romantic Messages','#/love-relationship'],['Gift Ideas','#/shop'],['Couple Photo Ideas','#/love-relationship'],['Couple Travel','#/travel'],['Marriage Inspiration','#/marriage']]
-        .map(([t,href])=>`<a class="tile" href="${href}"><div class="ti-ico">${lineArrow()}</div><b>${t}</b><span>Read more</span></a>`).join('')}
-    </div>
-  </section>
-
-  <section class="wrap">
-    <div class="section-head reveal"><div><h2>Follow the JodiGoals journey</h2><p>Fashion, gifts, love, travel & little moments made for two.</p></div></div>
-    <div class="gal-grid reveal">
-      ${[0,1,0,1,0,1,0,1].map((s,i)=>`<div class="gal-item g scape${s?' alt':''} grain">${LINE_ART[s]}</div>`).join('')}
-    </div>
-    <div style="display:flex; gap:14px; margin-top:26px;" class="reveal">
-      <a class="btn btn-light" target="_blank" rel="noopener" href="https://www.instagram.com/jodigoals.in/">Instagram</a>
-      <a class="btn btn-light" target="_blank" rel="noopener" href="https://pin.it/4eSYWDDDv">Pinterest</a>
-      <a class="btn btn-light" target="_blank" rel="noopener" href="https://www.youtube.com/@JodiGoals">YouTube</a>
     </div>
   </section>
   `);
 }
 
-/* ---------- SHOP (search + filter + sort) ---------- */
+/* ---------- SHOP VIEW ---------- */
 function renderShop(catSlug){
   const catMeta = CATEGORIES.find(c=>c.slug===catSlug);
-  const params = new URLSearchParams(location.hash.split('?')[1]||'');
-  let state = {
-    q:'', cat: catMeta ? (catMeta.filterCat || catSlug) : 'all',
-    tag:'all', sort:'popular', minR:0
-  };
   mount(`
     <div data-title="${catMeta?catMeta.label:'Shop'} – JodiGoals"></div>
-    <section class="page-hero wrap">
-      <span class="hero-eyebrow" style="color:var(--rose);">${catMeta?catMeta.label:'Shop All'}</span>
-      <h1>${catMeta?catMeta.label:'Every gift for two'}</h1>
-      <p>${catMeta?catMeta.sub:'Search and filter to find the right one.'}</p>
-    </section>
-    <section class="wrap" style="padding-top:0;">
-      <div class="shop-toolbar">
+    <section class="wrap" style="padding-top:40px;">
+      <span style="color:var(--rose); font-size:13px; font-weight:600;">JODIGOALS SHOP</span>
+      <h1 style="font-size:36px; margin-top:6px;">${catMeta?catMeta.label:'All Couple Gifts'}</h1>
+      <p style="margin-top:8px;">${catMeta?catMeta.sub:'Explore our complete range of gifts made for two.'}</p>
+      
+      <div class="shop-toolbar" style="margin-top:24px;">
         <div class="search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input id="shopSearch" type="text" placeholder="Search products…">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input id="shopSearch" type="text" placeholder="Search gifts, jewellery, hoodies…">
         </div>
         <select id="sortSelect">
-          <option value="popular">Sort: Popular</option>
+          <option value="popular">Popular</option>
           <option value="lowhigh">Price: Low to High</option>
           <option value="highlow">Price: High to Low</option>
-          <option value="rating">Rating</option>
         </select>
       </div>
-      <div class="chip-row" id="tagChips">
-        ${[['all','All'],['her','For Her'],['him','For Him'],['couples','For Couples']].map(([v,l])=>`<button class="chip ${v==='all'?'active':''}" data-tag="${v}">${l}</button>`).join('')}
-      </div>
+
       <div class="chip-row" id="catChips">
-        <button class="chip ${!catMeta?'active':''}" data-cat="all">All Categories</button>
+        <button class="chip ${!catMeta?'active':''}" data-cat="all">All</button>
         ${CATEGORIES.filter(c=>c.filterCat).map(c=>`<button class="chip ${catMeta&&catMeta.slug===c.slug?'active':''}" data-cat="${c.filterCat}">${c.label}</button>`).join('')}
       </div>
-      <p class="result-count" id="resultCount"></p>
+
       <div class="prod-grid" id="shopGrid"></div>
     </section>
   `);
 
-  const grid = $('#shopGrid'), count = $('#resultCount');
-  function apply(){
+  let currentCat = catMeta ? (catMeta.filterCat || catSlug) : 'all';
+  let query = '';
+  let sort = 'popular';
+
+  function filter(){
     let list = PRODUCTS.filter(p=>{
-      if(state.cat!=='all' && p.cat!==state.cat) return false;
-      if(state.tag!=='all' && !p.tag.includes(state.tag)) return false;
-      if(state.q && !(p.name.toLowerCase().includes(state.q) || p.desc.toLowerCase().includes(state.q))) return false;
+      if(currentCat!=='all' && p.cat!==currentCat) return false;
+      if(query && !(p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query))) return false;
       return true;
     });
-    if(state.sort==='lowhigh') list = list.slice().sort((a,b)=>a.price-b.price);
-    else if(state.sort==='highlow') list = list.slice().sort((a,b)=>b.price-a.price);
-    else if(state.sort==='rating') list = list.slice().sort((a,b)=>b.rating-a.rating);
-    else list = list.slice().sort((a,b)=>b.reviews-a.reviews);
-    count.textContent = `${list.length} product${list.length!==1?'s':''} found`;
-    grid.innerHTML = list.length ? list.map(productCard).join('') : `<p style="grid-column:1/-1; padding:40px 0;">No products match your filters yet — try clearing a filter.</p>`;
+    if(sort==='lowhigh') list.sort((a,b)=>a.price-b.price);
+    if(sort==='highlow') list.sort((a,b)=>b.price-a.price);
+    $('#shopGrid').innerHTML = list.length ? list.map(productCard).join('') : '<p style="grid-column:1/-1; padding:40px 0;">No items found matching your filter.</p>';
   }
-  $('#shopSearch').addEventListener('input', e=>{ state.q = e.target.value.trim().toLowerCase(); apply(); });
-  $('#sortSelect').addEventListener('change', e=>{ state.sort = e.target.value; apply(); });
-  $$('#tagChips .chip').forEach(b=>b.addEventListener('click', ()=>{ $$('#tagChips .chip').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tag=b.dataset.tag; apply(); }));
-  $$('#catChips .chip').forEach(b=>b.addEventListener('click', ()=>{ $$('#catChips .chip').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.cat=b.dataset.cat; apply(); }));
-  apply();
+
+  $('#shopSearch').addEventListener('input', e=>{ query = e.target.value.toLowerCase().trim(); filter(); });
+  $('#sortSelect').addEventListener('change', e=>{ sort = e.target.value; filter(); });
+  $$('#catChips .chip').forEach(b=>b.addEventListener('click', ()=>{
+    $$('#catChips .chip').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentCat = b.dataset.cat;
+    filter();
+  }));
+  filter();
 }
 
-/* ---------- PRODUCT DETAIL ---------- */
+/* ---------- PRODUCT DETAIL VIEW (REAL GALLERY) ---------- */
 function renderProduct(id){
   const p = PRODUCTS.find(x=>x.id===id);
-  if(!p) return render404();
-  const related = PRODUCTS.filter(x=>x.cat===p.cat && x.id!==p.id).slice(0,4);
+  if(!p) return renderHome();
+  const gallery = p.gallery || [p.image];
+
   mount(`
     <div data-title="${p.name} – JodiGoals"></div>
     <section class="wrap" style="padding-top:40px;">
-      <div style="font-size:13px; color:var(--ink-soft); margin-bottom:26px;">
-        <a href="#/">Home</a> / <a href="#/shop/${CATEGORIES.find(c=>c.filterCat===p.cat)?.slug||''}">${p.catLabel}</a> / <span style="color:var(--ink);">${p.name}</span>
+      <div style="font-size:13px; color:var(--ink-soft); margin-bottom:24px;">
+        <a href="#/">Home</a> / <a href="#/shop/${CATEGORIES.find(c=>c.filterCat===p.cat)?.slug||''}">${p.catLabel}</a> / <span>${p.name}</span>
       </div>
       <div class="pd-wrap">
         <div class="pd-gallery">
-          <div class="scape${p.art===1?' alt':''} grain" id="pdMain">${LINE_ART[p.art%2]}</div>
-          <div class="pd-thumbs">
-            <div class="scape active" data-a="0">${LINE_ART[0]}</div>
-            <div class="scape alt" data-a="1">${LINE_ART[1]}</div>
+          <div class="pd-gallery-main">
+            <img id="pdMainImg" src="${gallery[0]}" alt="${p.name}">
           </div>
+          ${gallery.length > 1 ? `
+          <div class="pd-thumbs">
+            ${gallery.map((img, i)=>`<img src="${img}" class="${i===0?'active':''}" data-src="${img}" alt="Thumbnail ${i+1}">`).join('')}
+          </div>` : ''}
         </div>
         <div class="pd-info">
           <span class="pcard-cat">${p.catLabel}</span>
-          <h1>${p.name}</h1>
-          <div class="pcard-rate"><span class="stars">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5-Math.round(p.rating))}</span> ${p.rating} · ${p.reviews} reviews</div>
+          <h1 style="margin-top:8px;">${p.name}</h1>
+          <div class="pcard-rate" style="margin-top:10px;">
+            <span class="stars">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5-Math.round(p.rating))}</span> ${p.rating} · ${p.reviews} reviews
+          </div>
           <div class="pd-price">
             <span class="now">${fmt(p.price)}</span>
             ${p.old?`<span class="old">${fmt(p.old)}</span><span class="off">${pct(p.price,p.old)}% off</span>`:''}
           </div>
-          <p class="desc">${p.desc}</p>
+          <p style="margin-top:18px;">${p.desc}</p>
           <ul class="pd-feat">
             ${p.features.map(f=>`<li>${lineCheck()}<span>${f}</span></li>`).join('')}
           </ul>
           <div class="pd-cta-row">
-            <a class="btn btn-primary" href="${p.amazon}" target="_blank" rel="noopener sponsored">Shop Now on Amazon</a>
+            <a class="btn btn-primary" href="${p.amazon}" target="_blank" rel="noopener sponsored" onclick="trackAffiliateClick('${p.id}', '${p.name.replace(/'/g,"\\'")}', this.href)">Shop Now on Amazon</a>
             <button class="icon-btn pcard-wish ${wishlist.includes(p.id)?'active':''}" data-id="${p.id}" style="width:46px;height:46px;" onclick="toggleWish('${p.id}')" aria-label="Wishlist">${lineHeart()}</button>
           </div>
           <div class="pd-why">
-            <h4>Why you'll love it</h4>
-            <p>${p.desc} It's the kind of small, considered thing that gets kept — on a shelf, a nightstand, a neck — long after the wrapping paper is gone.</p>
+            <h4 style="margin-bottom:8px;">Why JodiGoals recommends it</h4>
+            <p style="font-size:14px;">Selected for durable craftsmanship, high customer satisfaction scores, and sentimental value for anniversaries and birthdays.</p>
           </div>
         </div>
       </div>
     </section>
-    ${related.length? `
-    <section class="wrap">
-      <div class="section-head"><h2>You might also like</h2></div>
-      <div class="prod-grid">${related.map(productCard).join('')}</div>
-    </section>` : ''}
   `);
-  $$('.pd-thumbs .scape').forEach(t=>t.addEventListener('click', ()=>{
-    $$('.pd-thumbs .scape').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    $('#pdMain').className = 'scape grain' + (t.dataset.a==='1'?' alt':'');
-    $('#pdMain').innerHTML = LINE_ART[t.dataset.a];
-  }));
+
+  // Interactive gallery thumbnail switcher
+  $$('.pd-thumbs img').forEach(thumb=>{
+    thumb.addEventListener('click', ()=>{
+      $$('.pd-thumbs img').forEach(t=>t.classList.remove('active'));
+      thumb.classList.add('active');
+      $('#pdMainImg').src = thumb.dataset.src;
+    });
+  });
+
   const sticky = $('#stickyShop');
   $('#stickyPrice').textContent = fmt(p.price);
   $('#stickyBtn').href = p.amazon;
+  $('#stickyBtn').onclick = () => trackAffiliateClick(p.id, p.name, p.amazon);
   const onScroll = ()=>{ sticky.classList.toggle('show', window.scrollY>420); };
   window.addEventListener('scroll', onScroll);
-  onScroll();
 }
 
-/* ---------- LOVE / TRAVEL / MARRIAGE (simple content hubs) ---------- */
-const HUBS = {
-  love:{ title:'Love & Relationship', eyebrow:'More than just gifts',
-    copy:'Ideas, prompts and small nudges for the relationship side of things — not just what to buy, but what to say and do.',
-    cards:[['Relationship Ideas','Little rituals worth starting this month.'],['Romantic Messages','What to write when the card is blank.'],['Couple Photo Ideas','Poses and prompts that don\u2019t feel staged.'],['Date Night Prompts','Low-effort, high-return evenings in.']] },
-  travel:{ title:'Couple Travel', eyebrow:'Two tickets, one map',
-    copy:'Trip inspiration, packing edits and travel-friendly gifts for the couple who\u2019d rather collect stamps than things.',
-    cards:[['Weekend Getaways','Short trips that still feel like an escape.'],['Travel Gift Ideas','Practical, not precious.'],['Packing for Two','What actually needs its own bag.'],['Anniversary Trips','Where to go for the big ones.']] },
-  marriage:{ title:'Wedding & Marriage', eyebrow:'For the ones just starting',
-    copy:'From engagement to the first anniversary — gifts, inspiration and a little guidance for the marriage chapter.',
-    cards:[['Wedding Gift Ideas','For the couple who has almost everything.'],['Marriage Inspiration','Real talk from people a few years ahead.'],['First Anniversary','Traditional gifts, modernised.'],['Engagement Edit','Ring care, announcements, and what\u2019s next.']] }
-};
-function renderSimplePage(key){
-  const h = HUBS[key];
+/* ---------- OTHER VIEWS ---------- */
+function renderSimplePage(topic){
+  const titles = { love: 'Love & Relationship', travel: 'Couple Travel', marriage: 'Wedding & Marriage' };
   mount(`
-    <div data-title="${h.title} – JodiGoals"></div>
-    <section class="hero" style="padding:0;">
-      <div class="hero-scape">${scapeEl(key.length,true)}</div>
-      <div class="hero-scrim"></div>
-      <div class="hero-inner">
-        <span class="hero-eyebrow">${h.eyebrow}</span>
-        <h1>${h.title}</h1>
-        <p class="sub">${h.copy}</p>
-      </div>
-    </section>
-    <section class="wrap">
-      <div class="tile-grid reveal" style="grid-template-columns:repeat(2,1fr);">
-        ${h.cards.map(([t,d])=>`<div class="tile"><div class="ti-ico">${lineHeart()}</div><b>${t}</b><span>${d}</span></div>`).join('')}
-      </div>
-    </section>
-    <section class="wrap">
-      <div class="section-head reveal"><div><h2>Shop the edit</h2></div><a href="#/shop" class="btn btn-ghost">View all</a></div>
-      <div class="prod-grid reveal">${PRODUCTS.slice(2,6).map(productCard).join('')}</div>
-    </section>
-  `);
-}
-
-/* ---------- ABOUT ---------- */
-function renderAbout(){
-  mount(`
-    <div data-title="About JodiGoals"></div>
-    <section class="page-hero wrap">
-      <span class="hero-eyebrow" style="color:var(--rose);">About us</span>
-      <h1>We believe gifts should be noticed, not just given.</h1>
-      <p>JodiGoals started as a small edit of things worth buying for two — gifts, fashion and jewellery that hold up after the occasion is over.</p>
-    </section>
-    <section class="wrap content-page">
-      <div class="split">
-        <div class="scape">${scapeEl(2,false)}</div>
-        <div class="content">
-          <h2 style="margin-top:0;">What we do</h2>
-          <p>We curate couple gifts, fashion, jewellery and personalized products from across the web, and point you to the best listing we can find. We're an affiliate-led discovery site — not a retailer — which means we can be honest about what's actually good.</p>
-          <p>Every product on JodiGoals is chosen for how it fits into a real relationship, not just how it photographs.</p>
-        </div>
+    <section class="wrap" style="padding-top:40px;">
+      <h1>${titles[topic] || 'Explore'}</h1>
+      <p style="margin-top:14px; max-width:600px;">Handpicked gift and lifestyle ideas for two. More guides and couple travel edits coming soon!</p>
+      <div class="prod-grid" style="margin-top:36px;">
+        ${PRODUCTS.slice(0,4).map(productCard).join('')}
       </div>
     </section>
   `);
 }
 
-/* ---------- CONTACT ---------- */
-function renderContact(){
-  mount(`
-    <div data-title="Contact JodiGoals"></div>
-    <section class="page-hero wrap">
-      <span class="hero-eyebrow" style="color:var(--rose);">Get in touch</span>
-      <h1>Questions, ideas, partnerships — we're listening.</h1>
-    </section>
-    <section class="wrap content-page">
-      <div class="contact-grid">
-        <div>
-          <h2 style="margin-top:0;">Send a message</h2>
-          <form id="contactForm">
-            <div class="form-field"><label>Name</label><input required type="text" placeholder="Your name"></div>
-            <div class="form-field"><label>Email</label><input required type="email" placeholder="you@email.com"></div>
-            <div class="form-field"><label>Message</label><textarea required rows="5" placeholder="How can we help?"></textarea></div>
-            <button type="submit" class="btn btn-primary btn-block">Send Message</button>
-          </form>
-        </div>
-        <div>
-          <h2 style="margin-top:0;">Other ways to reach us</h2>
-          <p>For product suggestions or collaborations, message us on Instagram — it's where we're most active.</p>
-          <div style="margin-top:20px; display:flex; flex-direction:column; gap:12px;">
-            <a class="btn btn-light" target="_blank" rel="noopener" href="https://www.instagram.com/jodigoals.in/">Instagram · @jodigoals.in</a>
-            <a class="btn btn-light" target="_blank" rel="noopener" href="https://pin.it/4eSYWDDDv">Pinterest</a>
-            <a class="btn btn-light" target="_blank" rel="noopener" href="https://www.youtube.com/@JodiGoals">YouTube</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  `);
-  $('#contactForm').addEventListener('submit', e=>{ e.preventDefault(); toast('Message sent — we\u2019ll get back to you soon.'); e.target.reset(); });
-}
-
-/* ---------- FAQ ---------- */
-const FAQS = [
-  ['Is JodiGoals a store?','No — JodiGoals is a curated discovery site. When you tap Shop Now, you\u2019re taken to the product listing (currently Amazon) to complete your purchase.'],
-  ['Do you earn a commission?','Yes. JodiGoals may earn a small commission on qualifying purchases made through our links, at no extra cost to you. See our Affiliate Disclosure for details.'],
-  ['Can I return a product?','Returns are handled by the retailer (e.g. Amazon) according to their own policy, since JodiGoals doesn\u2019t process payments or shipping directly.'],
-  ['How do I track an order?','Order tracking happens on the retailer\u2019s site where you completed checkout — you\u2019ll get their confirmation email with tracking details.'],
-  ['Can I suggest a product?','Always. Message us on Instagram with the product and we\u2019ll take a look.'],
-];
-function renderFaq(){
-  mount(`
-    <div data-title="FAQ – JodiGoals"></div>
-    <section class="page-hero wrap">
-      <span class="hero-eyebrow" style="color:var(--rose);">FAQ</span>
-      <h1>Frequently asked questions</h1>
-    </section>
-    <section class="wrap content-page" style="max-width:760px;">
-      ${FAQS.map((f,i)=>`
-        <div class="faq-item" id="faq${i}">
-          <div class="faq-q" onclick="document.getElementById('faq${i}').classList.toggle('open')">${f[0]}${linePlus()}</div>
-          <div class="faq-a">${f[1]}</div>
-        </div>`).join('')}
-    </section>
-  `);
-}
-
-/* ---------- LEGAL ---------- */
-const LEGAL = {
-  privacy:{ title:'Privacy Policy', body:`
-    <h2>What we collect</h2><p>JodiGoals collects only what's needed to run the site well — pages viewed, general location for currency/region, and anything you submit through our contact form.</p>
-    <h2>How we use it</h2><p>To improve the site, respond to enquiries, and understand which products people find genuinely useful.</p>
-    <h2>Third parties</h2><p>Shop Now links take you to third-party retailers (currently Amazon), who have their own privacy policies governing your purchase.</p>
-    <h2>Cookies</h2><p>We may use basic cookies for site functionality like remembering your wishlist. You can clear these anytime in your browser settings.</p>` },
-  terms:{ title:'Terms & Conditions', body:`
-    <h2>Using this site</h2><p>JodiGoals is provided for personal, non-commercial browsing. Content, layout and original text are owned by JodiGoals unless otherwise credited.</p>
-    <h2>Purchases</h2><p>All purchases happen on the retailer's site (e.g. Amazon). JodiGoals is not the seller of record and isn't responsible for pricing, stock, shipping or returns.</p>
-    <h2>Accuracy</h2><p>We try to keep prices and details current, but the retailer's listing is always the source of truth.</p>
-    <h2>Changes</h2><p>We may update these terms occasionally; continued use of the site means you accept the current version.</p>` },
-  affiliate:{ title:'Affiliate Disclosure', body:`
-    <h2>Our disclosure</h2><p>JodiGoals participates in affiliate programs, including an Amazon Associates–style program. This means that when you click a Shop Now button and make a qualifying purchase, JodiGoals may earn a small commission — at no additional cost to you.</p>
-    <h2>Why it matters</h2><p>This is how we keep curating gifts for couples without charging for access to the site. It doesn't affect the price you pay.</p>
-    <h2>Editorial independence</h2><p>Products are chosen because we think they're genuinely good gifts for couples — commission potential doesn't drive what gets featured.</p>` }
-};
-function renderLegal(key){
-  const l = LEGAL[key];
-  mount(`
-    <div data-title="${l.title} – JodiGoals"></div>
-    <section class="page-hero wrap"><h1>${l.title}</h1><p>Last updated ${new Date().toLocaleDateString('en-IN',{year:'numeric',month:'long'})}.</p></section>
-    <section class="wrap content-page" style="max-width:760px;">${l.body}</section>
-  `);
-}
-
-/* ---------- 404 ---------- */
-function render404(){
-  mount(`
-    <div data-title="Page not found – JodiGoals"></div>
-    <section class="wrap notfound">
-      <h1>404</h1>
-      <h2 style="margin-top:10px;">This moment doesn't exist yet.</h2>
-      <p style="margin-top:12px;">The page you're looking for may have moved. Let's get you back to something lovely.</p>
-      <a href="#/" class="btn btn-primary" style="margin-top:26px;">Back to Home</a>
-    </section>
-  `);
-}
-
-/* ---------- nav build ---------- */
+/* ---------- INIT & MOBILE MENU ---------- */
 function buildNav(){
   $('#mainnav').innerHTML = NAV.map(n=>`<a href="${n.href}">${n.label}</a>`).join('');
   $('#mobileNav').innerHTML = NAV.map(n=>`<a href="${n.href}">${n.label}</a>`).join('');
-  $('#socialDesktop').style.display = 'flex';
 }
-
-/* ---------- mobile menu ---------- */
 function closeMobile(){
   $('#mobilePanel').classList.remove('show');
   $('#hamburger').classList.remove('open');
@@ -948,19 +794,9 @@ $('#hamburger').addEventListener('click', ()=>{
   $('#mobilePanel').classList.toggle('show');
   $('#hamburger').classList.toggle('open');
 });
-$$('#mobilePanel a').forEach(a=>a.addEventListener('click', closeMobile));
+$('#searchIcon').addEventListener('click', ()=>{ location.hash = '#/shop'; });
+$('#wishIcon').addEventListener('click', ()=>{ toast(`${wishlist.length} item(s) in wishlist`); });
 
-/* search icon → jump to shop with focus */
-$('#searchIcon').addEventListener('click', ()=>{
-  location.hash = '#/shop';
-  setTimeout(()=>{ const s=$('#shopSearch'); if(s) s.focus(); }, 60);
-});
-$('#wishIcon').addEventListener('click', ()=>{
-  location.hash = '#/shop';
-  toast(wishlist.length ? `${wishlist.length} item(s) in your wishlist` : 'Your wishlist is empty');
-});
-
-/* ---------- scroll reveal (one orchestrated pattern) ---------- */
 function initReveal(){
   const els = $$('.reveal');
   if(!('IntersectionObserver' in window)){ els.forEach(e=>e.classList.add('in')); return; }
@@ -970,7 +806,6 @@ function initReveal(){
   els.forEach(e=>io.observe(e));
 }
 
-/* ---------- init ---------- */
 $('#yr').textContent = new Date().getFullYear();
 buildNav();
 updateWishBadge();
